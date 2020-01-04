@@ -137,8 +137,3 @@ class DetailView(View):
         else:
             #没有登录则跳转到登录页面
             return redirect(reverse('users:login'))
-
-"""
-insert into tb_comment(content,created,article_id,user_id)
-select content,created,article_id,user_id from tb_comment;
-"""

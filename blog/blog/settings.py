@@ -25,7 +25,7 @@ SECRET_KEY = 'tmo6$jrn7iq4u=)ukr6ca(i6a&-8b)^j^a==hnjn2mwc$!m_51'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -56,7 +56,7 @@ ROOT_URLCONF = 'blog.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR,'templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -77,12 +77,12 @@ WSGI_APPLICATION = 'blog.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql', # 数据库引擎
-        'HOST': '127.0.0.1', # 数据库主机
-        'PORT': 3306, # 数据库端口
-        'USER': 'root', # 数据库用户名
-        'PASSWORD': 'mysql', # 数据库用户密码
-        'NAME': 'blog_2' # 数据库名字
+        'ENGINE': 'django.db.backends.mysql',  # 数据库引擎
+        'HOST': '127.0.0.1',  # 数据库主机
+        'PORT': 3306,  # 数据库端口
+        'USER': 'root',  # 数据库用户名
+        'PASSWORD': 'mysql',  # 数据库用户密码
+        'NAME': 'blog_2'  # 数据库名字
     }
 }
 
@@ -109,9 +109,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 
-LANGUAGE_CODE = 'zh-Hans'   #原配置信息为'en-us'
+LANGUAGE_CODE = 'zh-Hans'   # 原配置信息为'en-us'
 
-TIME_ZONE = 'Asia/Shanghai'#原配置信息为'UTC'
+TIME_ZONE = 'Asia/Shanghai'  # 原配置信息为'UTC'
 
 USE_I18N = True
 
@@ -122,21 +122,21 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
-#访问静态资源的URL
+# 访问静态资源的URL
 STATIC_URL = '/static/'
 # 配置静态文件加载路径
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
-#设置redis
+# 设置redis
 CACHES = {
-    "default": { # 默认
+    "default": {  # 默认
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://127.0.0.1:6379/0",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
-    "session": { # session
+    "session": {  # session
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://127.0.0.1:6379/1",
         "OPTIONS": {
@@ -148,7 +148,7 @@ SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "session"
 
 
-#设置日志
+# 设置日志
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,  # 是否禁用已经存在的日志器
@@ -193,25 +193,10 @@ LOGGING = {
 # 自定义User模型代替系统的User
 AUTH_USER_MODEL = 'users.User'
 
-#设置未登录用户，必须登录的跳转连接
+# 设置未登录用户，必须登录的跳转连接
 LOGIN_URL = '/login/'
 
-#设置图片上传路径
+# 设置图片上传路径
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 # 图片的统一路由
 MEDIA_URL = '/media/'
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
