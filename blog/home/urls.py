@@ -1,6 +1,8 @@
-from django.urls import path
-from home.views import IndexView,DetailView
+from django.conf.urls import url
+from home.views import IndexView, DetailView
+
+
 urlpatterns = [
-    path('', IndexView.as_view(),name='index'),
-    path('detail/', DetailView.as_view(),name='detail'),
+    url('', IndexView.as_view(), name='index'),
+    url('detail/', DetailView.as_view(), name='detail'),
 ]
