@@ -6,17 +6,19 @@ from users.models import User
 from django.db import DatabaseError
 from django.shortcuts import redirect
 from django.urls import reverse
+
+
 class RegisterView(View):
 
-    def get(self,request):
-        return render(request,'register.html')
+    def get(self, request):
+        return render(request, 'register.html')
 
-    def post(self,request):
-        #接收参数
+    def post(self, request):
+        # 接收参数
         mobile = request.POST.get('mobile')
         password = request.POST.get('password')
         password2 = request.POST.get('password2')
-        smscode=request.POST.get('sms_code')
+        smscode = request.POST.get('sms_code')
 
         # 判断参数是否齐全
         if not all([mobile, password, password2, smscode]):
@@ -31,7 +33,7 @@ class RegisterView(View):
         if password != password2:
             return HttpResponseBadRequest('两次输入的密码不一致')
 
-        #验证短信验证码
+        # 验证短信验证码
         redis_conn = get_redis_connection('default')
         sms_code_server = redis_conn.get('sms:%s' % mobile)
         if sms_code_server is None:
@@ -41,7 +43,7 @@ class RegisterView(View):
 
         # 保存注册数据
         try:
-            user=User.objects.create_user(username=mobile,mobile=mobile, password=password)
+            user = User.objects.create_user(username=mobile, mobile=mobile, password=password)
         except DatabaseError:
             return HttpResponseBadRequest('注册失败')
 
@@ -49,32 +51,33 @@ class RegisterView(View):
         from django.contrib.auth import login
         login(request, user)
 
-        #设置首页所需的
+        # 设置首页所需的
 
         # 响应注册结果
         # return redirect(reverse('home:index'))
         # return HttpResponse('注册成功，重定向到首页')
-        #跳转到首页
+        # 跳转到首页
         response = redirect(reverse('home:index'))
-        #设置cookie
-        #登录状态，会话结束后自动过期
-        response.set_cookie('is_login',True)
-        #设置用户名有效期一个月
-        response.set_cookie('username',user.username,max_age=30*24*3600)
+        # 设置cookie
+        # 登录状态，会话结束后自动过期
+        response.set_cookie('is_login', True)
+        # 设置用户名有效期一个月
+        response.set_cookie('username', user.username, max_age=30*24*3600)
 
         return response
 
 
-from django.http import HttpResponseBadRequest,HttpResponse
+from django.http import HttpResponseBadRequest, HttpResponse
 from libs.captcha.captcha import captcha
 from django_redis import get_redis_connection
 
+
 class ImageCodeView(View):
 
-    def get(self,request):
-        #获取前端传递过来的参数
-        uuid=request.GET.get('uuid')
-        #判断参数是否为None
+    def get(self, request):
+        # 获取前端传递过来的参数
+        uuid = request.GET.get('uuid')
+        # 判断参数是否为None
         if uuid is None:
             return HttpResponseBadRequest('请求参数错误')
         # 获取验证码内容和验证码图片二进制数据
@@ -85,23 +88,26 @@ class ImageCodeView(View):
         # 返回响应，将生成的图片以content_type为image/jpeg的形式返回给请求
         return HttpResponse(image, content_type='image/jpeg')
 
+
 from django.http import JsonResponse
 from utils.response_code import RETCODE
 from random import randint
 from libs.yuntongxun.sms import CCP
 import logging
-logger=logging.getLogger('django')
+
+logger = logging.getLogger('django')
+
 
 class SmsCodeView(View):
 
-    def get(self,request):
+    def get(self, request):
         # 接收参数
         image_code_client = request.GET.get('image_code')
         uuid = request.GET.get('uuid')
-        mobile=request.GET.get('mobile')
+        mobile = request.GET.get('mobile')
 
         # 校验参数
-        if not all([image_code_client, uuid,mobile]):
+        if not all([image_code_client, uuid, mobile]):
             return JsonResponse({'code': RETCODE.NECESSARYPARAMERR, 'errmsg': '缺少必传参数'})
 
         # 创建连接到redis的对象
@@ -123,24 +129,27 @@ class SmsCodeView(View):
 
         # 生成短信验证码：生成6位数验证码
         sms_code = '%06d' % randint(0, 999999)
-        #将验证码输出在控制台，以方便调试
+        # 将验证码输出在控制台，以方便调试
         logger.info(sms_code)
         # 保存短信验证码到redis中，并设置有效期
         redis_conn.setex('sms:%s' % mobile, 300, sms_code)
         # 发送短信验证码
-        CCP().send_template_sms(mobile, [sms_code, 5],1)
+        CCP().send_template_sms(mobile, [sms_code, 5], 1)
 
         # 响应结果
         return JsonResponse({'code': RETCODE.OK, 'errmsg': '发送短信成功'})
 
+
 from django.contrib.auth import login
 from django.contrib.auth import authenticate
 
+
 class LoginView(View):
 
-    def get(self,request):
-        return render(request,'login.html')
-    def post(self,request):
+    def get(self, request):
+        return render(request, 'login.html')
+
+    def post(self, request):
         # 接受参数
         mobile = request.POST.get('mobile')
         password = request.POST.get('password')
@@ -161,7 +170,7 @@ class LoginView(View):
 
         # 认证登录用户
         # 认证字段已经在User模型中的USERNAME_FIELD = 'mobile'修改
-        user=authenticate(mobile=mobile, password=password)
+        user = authenticate(mobile=mobile, password=password)
 
         if user is None:
             return HttpResponseBadRequest('用户名或密码错误')
@@ -172,9 +181,9 @@ class LoginView(View):
         # 响应登录结果
         next = request.GET.get('next')
         if next:
-            response= redirect(next)
+            response = redirect(next)
         else:
-            response =  redirect(reverse('home:index'))
+            response = redirect(reverse('home:index'))
 
         # 设置状态保持的周期
         if remember != 'on':
@@ -189,13 +198,16 @@ class LoginView(View):
             # 设置cookie
             response.set_cookie('is_login', True, max_age=14*24 * 3600)
             response.set_cookie('username', user.username, max_age=30 * 24 * 3600)
-        #返回响应
+        # 返回响应
         return response
 
+
 from django.contrib.auth import logout
+
+
 class LogoutView(View):
 
-    def get(self,request):
+    def get(self, request):
         # 清理session
         logout(request)
         # 退出登录，重定向到登录页
@@ -262,35 +274,38 @@ class ForgetPasswordView(View):
 
         return response
 
-from django.contrib.auth.mixins import LoginRequiredMixin
-class UserCenterView(LoginRequiredMixin,View):
 
-    def get(self,request):
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+
+class UserCenterView(LoginRequiredMixin, View):
+
+    def get(self, request):
         # 获取用户信息
         user = request.user
 
-        #组织模板渲染数据
+        # 组织模板渲染数据
         context = {
             'username': user.username,
             'mobile': user.mobile,
             'avatar': user.avatar.url if user.avatar else None,
             'user_desc': user.user_desc
         }
-        return render(request,'center.html',context=context)
+        return render(request, 'center.html', context=context)
 
-    def post(self,request):
+    def post(self, request):
         # 接收数据
         user = request.user
         avatar = request.FILES.get('avatar')
-        username = request.POST.get('username',user.username)
-        user_desc = request.POST.get('desc',user.user_desc)
+        username = request.POST.get('username', user.username)
+        user_desc = request.POST.get('desc', user.user_desc)
 
         # 修改数据库数据
         try:
-            user.username=username
-            user.user_desc=user_desc
+            user.username = username
+            user.user_desc = user_desc
             if avatar:
-                user.avatar=avatar
+                user.avatar = avatar
             user.save()
         except Exception as e:
             logger.error(e)
@@ -298,45 +313,48 @@ class UserCenterView(LoginRequiredMixin,View):
 
         # 返回响应，刷新页面
         response = redirect(reverse('users:center'))
-        ##更新cookie信息
-        response.set_cookie('username',user.username,max_age=30*24*3600)
+        # 更新cookie信息
+        response.set_cookie('username', user.username, max_age=30*24*3600)
         return response
 
-from home.models import ArticleCategory,Article
-class WriteBlogView(LoginRequiredMixin,View):
 
-    def get(self,request):
+from home.models import ArticleCategory, Article
+
+
+class WriteBlogView(LoginRequiredMixin, View):
+
+    def get(self, request):
         # 获取博客分类信息
         categories = ArticleCategory.objects.all()
 
         context = {
             'categories': categories
         }
-        return render(request,'write_blog.html',context=context)
+        return render(request, 'write_blog.html', context=context)
 
-    def post(self,request):
-        #接收数据
-        avatar=request.FILES.get('avatar')
-        title=request.POST.get('title')
-        category_id=request.POST.get('category')
-        tags=request.POST.get('tags')
-        sumary=request.POST.get('sumary')
-        content=request.POST.get('content')
-        user=request.user
+    def post(self, request):
+        # 接收数据
+        avatar = request.FILES.get('avatar')
+        title = request.POST.get('title')
+        category_id = request.POST.get('category')
+        tags = request.POST.get('tags')
+        sumary = request.POST.get('sumary')
+        content = request.POST.get('content')
+        user = request.user
 
-        #验证数据是否齐全
-        if not all([avatar,title,category_id,sumary,content]):
+        # 验证数据是否齐全
+        if not all([avatar, title, category_id, sumary, content]):
             return HttpResponseBadRequest('参数不全')
 
-        #判断文章分类id数据是否正确
+        # 判断文章分类id数据是否正确
         try:
-            article_category=ArticleCategory.objects.get(id=category_id)
+            article_category = ArticleCategory.objects.get(id=category_id)
         except ArticleCategory.DoesNotExist:
             return HttpResponseBadRequest('没有此分类信息')
 
-        #保存到数据库
+        # 保存到数据库
         try:
-            article=Article.objects.create(
+            article = Article.objects.create(
                 author=user,
                 avatar=avatar,
                 category=article_category,
@@ -349,6 +367,6 @@ class WriteBlogView(LoginRequiredMixin,View):
             logger.error(e)
             return HttpResponseBadRequest('发布失败，请稍后再试')
 
-        #返回响应，跳转到文章详情页面
-        #暂时先跳转到首页
+        # 返回响应，跳转到文章详情页面
+        # 暂时先跳转到首页
         return redirect(reverse('home:index'))
