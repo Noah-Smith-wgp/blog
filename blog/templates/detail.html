@@ -79,6 +79,10 @@
              <!-- 标题及作者 -->
             <h1 class="mt-4 mb-4">{{ article.title }}</h1>
             <div class="alert alert-success"><div>作者：<span>{{ article.author.username }}</span></div><div>浏览：{{ article.total_views }}</div></div>
+             <!-- 标题图 -->
+            <div class="col-3">
+                <img src="{{ article.avatar.url }}" alt="avatar" style="max-width:500%; border-radius: 20px">
+            </div>
             <!-- 文章正文 -->
             <div class="col-12" style="word-break: break-all;word-wrap: break-word;">
                 {{ article.content|safe }}
@@ -144,7 +148,7 @@
 <!-- Footer -->
 <footer class="py-3 bg-dark" id="footer">
     <div class="container">
-        <h5 class="m-0 text-center text-white">Copyright @ qiruihua</h5>
+        <h5 class="m-0 text-center text-white">Copyright @ 镜花水月</h5>
     </div>
 </footer>
 </div>

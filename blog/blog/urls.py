@@ -17,11 +17,11 @@ from django.contrib import admin
 from django.conf.urls import url, include
 
 urlpatterns = [
-    url('admin/', admin.site.urls),
+    url(r'^admin/', admin.site.urls),
     # include 参数1要设置为元组（urlconf_module, app_name）
     # namespace 设置命名空间
-    url('', include(('users.urls', 'users'), namespace='users')),
-    url('', include(('home.urls', 'home'), namespace='home')),
+    url(r'^', include(('users.urls', 'users'), namespace='users')),
+    url(r'^', include(('home.urls', 'home'), namespace='home')),
 ]
 
 from django.conf import settings
